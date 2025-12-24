@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import Icon from '@/components/ui/icon';
+import { PaymentButton } from '@/components/extensions/robokassa/PaymentButton';
+import func2url from '../../backend/func2url.json';
 
 interface GiftCard {
   id: number;
@@ -204,15 +206,36 @@ const Index = () => {
                   )}
                 </CardHeader>
                 <CardContent>
-                  <Button
-                    className={`w-full ${
+                  <PaymentButton
+                    apiUrl={func2url['robokassa-robokassa']}
+                    amount={card.price}
+                    userName="Покупатель"
+                    userEmail="customer@example.com"
+                    userPhone="+79991234567"
+                    cartItems={[
+                      {
+                        id: card.id.toString(),
+                        name: `Apple Gift Card ${card.amount.toLocaleString('ru-RU')} ₽`,
+                        price: card.price,
+                        quantity: 1,
+                      },
+                    ]}
+                    successUrl={typeof window !== 'undefined' ? window.location.origin + '/success' : ''}
+                    failUrl={typeof window !== 'undefined' ? window.location.origin : ''}
+                    onSuccess={(orderNum) => {
+                      alert(`Заказ ${orderNum} создан! Переход на оплату...`);
+                    }}
+                    onError={(error) => {
+                      console.error('Ошибка оплаты:', error);
+                      alert('Ошибка при создании платежа. Попробуйте ещё раз.');
+                    }}
+                    buttonText={`Купить за ${card.price.toLocaleString('ru-RU')} ₽`}
+                    className={`w-full py-2 px-4 rounded-lg font-medium transition-all ${
                       selectedCard === card.id
-                        ? 'bg-[#0071e3] hover:bg-[#0077ed]'
+                        ? 'bg-[#0071e3] hover:bg-[#0077ed] text-white'
                         : 'bg-white/10 hover:bg-white/20 text-white'
                     }`}
-                  >
-                    {card.price.toLocaleString('ru-RU')} ₽
-                  </Button>
+                  />
                   <div className="mt-4 space-y-2 text-sm text-gray-400">
                     <div className="flex items-center gap-2">
                       <Icon name="Check" size={16} className="text-green-400" />
